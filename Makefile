@@ -14,7 +14,7 @@ assembler: assembler.o assembleInstructions.o
 
 # The main.o target can be written more simply
 
-assembler.o: assembler.cpp assembleInstructions.h 
+assembler.o: assembler.cpp assembleInstructions.h riscv.h 
 	$(CXX) $(CXXFLAGS) -c assembler.cpp
 
-assembleInstructions.o: assembleInstructions.h
+assembleInstructions.o: assembleInstructions.h riscv.h

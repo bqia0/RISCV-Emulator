@@ -32,6 +32,8 @@ uint32_t instructionToMachineCode(const string& instruction){
 
     if(isImmediateArithmetic(operation)){
         return immediateArithmetic(operation, words);
+    }else if(operation == "lui"){
+        return lui(words);
     }
     //TODO: REST OF OPCODES
 }

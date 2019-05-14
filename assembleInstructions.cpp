@@ -1,6 +1,7 @@
 #include <iostream>
 #include "assembleInstructions.h"
 #include "riscv.h"
+#include <bitset>
 
 uint32_t immediateArithmetic(const string & operation, const vector<string> &words){
     uint8_t rs0, rs1, rs2, rd, funct3, opcode;
@@ -8,7 +9,7 @@ uint32_t immediateArithmetic(const string & operation, const vector<string> &wor
     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
     opcode = OP_IMM;
-    imm = parseUImmediate(words[3]);
+    imm = parseIImmediate(words[3]);
     if(operation == "addi") {
         funct3 = ADD_FUNCT3;
     }else if(operation == "andi"){
@@ -30,9 +31,12 @@ uint32_t immediateArithmetic(const string & operation, const vector<string> &wor
     }else{
         cout << "Bad Operation " << endl;
     }
-    return opcode | (rd << RD_OFFSET) | 
+    uint32_t test = opcode | (rd << RD_OFFSET) | 
     (funct3 << FUNCT3_OFFSET) | 
-    (rs1 << RS1_OFFSET) | (imm << U_IMM_OFFSET);
+    (rs1 << RS1_OFFSET) | (imm << I_IMM_OFFSET);
+    // bitset<32> a(test);
+    // cout << a.to_string() << endl;
+    return test;
 }
 
 int isImmediateArithmetic(const string & operation){
@@ -50,7 +54,17 @@ int isImmediateArithmetic(const string & operation){
     return 0;
 }
 
-int32_t parseUImmediate(const string imm){
+uint32_t lui(const vector<string> words){
+    uint8_t opcode;
+    uint8_t rd;
+    int32_t imm;
+    imm = parseUImmediate(words[2]);
+    opcode = OP_LUI;
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    return opcode | (rd << RD_OFFSET) | (imm << U_IMM_OFFSET);
+}
+
+int32_t parseIImmediate(const string imm){
     if(imm.substr(0, 2) == "0x"){
        return stoi(imm, NULL, 16);
     }else if (imm[0] == '#'){
@@ -59,4 +73,15 @@ int32_t parseUImmediate(const string imm){
         cout << "Invalid Immediate Type" << endl; //TODO Give a more descriptive message
         exit(0);
     }
+}
+
+int32_t parseUImmediate(const string imm){
+    if(imm.substr(0, 2) == "0x"){
+       return stoi(imm, NULL, 16);
+    }else if (imm[0] == '#'){
+       return stoi(imm.substr(1, imm.size() - 1));
+    }else{
+        cout << "Invalid Immediate Type" << endl; //TODO Give a more descriptive message
+        exit(0);
+    }    
 }
