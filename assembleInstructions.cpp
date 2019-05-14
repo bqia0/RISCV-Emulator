@@ -4,11 +4,12 @@
 #include <bitset>
 
 uint32_t immediateArithmetic(const string & operation, const vector<string> &words){
-    uint8_t rs0, rs1, rs2, rd, funct3, opcode;
+    uint8_t rs1, rd, funct3, opcode;
     int16_t imm;
     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
     opcode = OP_IMM;
+    funct3 = 0;
     imm = parseIImmediate(words[3]);
     if(operation == "addi") {
         funct3 = ADD_FUNCT3;
@@ -54,7 +55,7 @@ int isImmediateArithmetic(const string & operation){
     return 0;
 }
 
-uint32_t lui(const vector<string> words){
+uint32_t lui(const vector<string> & words){
     uint8_t opcode;
     uint8_t rd;
     int32_t imm;
@@ -64,7 +65,17 @@ uint32_t lui(const vector<string> words){
     return opcode | (rd << RD_OFFSET) | (imm << U_IMM_OFFSET);
 }
 
-int32_t parseIImmediate(const string imm){
+uint32_t auipc(const vector<string> & words){
+    uint8_t opcode;
+    uint8_t rd;
+    int32_t imm;
+    imm = parseUImmediate(words[2]);
+    opcode = OP_AUIPC;
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    return opcode | (rd << RD_OFFSET) | (imm << U_IMM_OFFSET);
+}
+
+int32_t parseIImmediate(const string & imm){
     if(imm.substr(0, 2) == "0x"){
        return stoi(imm, NULL, 16);
     }else if (imm[0] == '#'){
@@ -75,7 +86,7 @@ int32_t parseIImmediate(const string imm){
     }
 }
 
-int32_t parseUImmediate(const string imm){
+int32_t parseUImmediate(const string & imm){
     if(imm.substr(0, 2) == "0x"){
        return stoi(imm, NULL, 16);
     }else if (imm[0] == '#'){

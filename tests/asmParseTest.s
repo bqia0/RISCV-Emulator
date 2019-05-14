@@ -8,3 +8,4 @@ SraI x23, x12, 0x3
 SRLi x12, x23, 0x4
 SLLI x10, x30, 0x10
 lui x5, #123
+AUIPc x23, 0xff
