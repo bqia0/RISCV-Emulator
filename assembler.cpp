@@ -9,34 +9,25 @@
 
 using namespace std;
 
-string parseImmediate(const string imm){
-    int32_t immediateInt;
-    uint32_t immediateIntTwosComplement;
+int32_t parseUImmediate(const string imm){
     if(imm.substr(0, 2) == "0x"){
-        immediateInt = stoi(imm, NULL, 16);
-        //cout << immediateInt << endl;
-        return std::bitset<11>(immediateInt).to_string(); 
+       return stoi(imm, NULL, 16);
     }else if (imm[0] == '#'){
-        immediateInt = stoi(imm.substr(1, imm.size() - 1));
-        if(immediateInt < 0){
-            //cout << immediateInt << endl;
-            immediateIntTwosComplement = ~(immediateInt * -1) + 1;//~(immediateInt + 1);
-            //cout << immediateIntTwosComplement << endl;
-            return std::bitset<11>(immediateIntTwosComplement).to_string();
-        }
-        return std::bitset<11>(immediateInt).to_string();
+       return stoi(imm.substr(1, imm.size() - 1));
+    }else{
+        cout << "Invalid Immediate Type" << endl; //TODO Give a more descriptive message
+        exit(0);
     }
-    return NULL; // error case
 }
 
-string instructionToMachineCode(const string& instruction){
+uint32_t instructionToMachineCode(const string& instruction){
     stringstream ss(instruction);
     string currWord;
     string operation;
-    string opcode;
+    uint8_t opcode;
     string token;
-    unsigned int rs0, rs1, rs2, rd;
-    string imm;
+    uint8_t rs0, rs1, rs2, rd;
+    int16_t imm;
     vector<string> words;
 
     // convert current instruction into vector of words
@@ -57,16 +48,18 @@ string instructionToMachineCode(const string& instruction){
         rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
         rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
         opcode = OP_IMM;
-        imm = parseImmediate(words[3]);
-        return imm + bitset<3>(rs1).to_string() + ADD_FUNCT3 + bitset<3>(rd).to_string() + OP_IMM;
+        imm = parseUImmediate(words[3]);
+        return opcode | (rd << RD_OFFSET) | 
+               (ADD_FUNCT3 << FUNCT3_OFFSET) | 
+               (rs1 << RS1_OFFSET) | (imm << U_IMM_OFFSET);
     }
 }
 
 int testParseImmediate(){
-    cout << parseImmediate("#12") << endl;
-    cout << parseImmediate("#-1") << endl;
-    cout << parseImmediate("0x23") << endl;
-    cout << parseImmediate("#-5") << endl;
+    cout << parseUImmediate("#12") << endl;
+    cout << parseUImmediate("#-1") << endl;
+    cout << parseUImmediate("0x23") << endl;
+    cout << parseUImmediate("#-5") << endl;
 
 }
 
@@ -76,12 +69,14 @@ int main(int argc, char* argv[]){
         return 0;
     }
     string currentInstruction;
+    uint32_t instructionIntOut;
     ifstream asmFile(argv[1], ifstream::in);
     ofstream machineFile(argv[2], ofstream::out);
 
     while(getline(asmFile, currentInstruction)){
         // TODO: write machine code to file
-        machineFile << instructionToMachineCode(currentInstruction) << endl;
+        instructionIntOut = instructionToMachineCode(currentInstruction);
+        machineFile.write((char*)&instructionIntOut, sizeof(uint32_t));
     }
     return 0;
 }
