@@ -16,7 +16,15 @@
 #define OP_JALR   0b1100111
 #define OP_BR     0b1100011
 
-#define ADD_FUNCT3 0b000
-#define AND_FUNCT3 0b111
+#define ADD_FUNCT3  0b000
+#define AND_FUNCT3  0b111
+#define OR_FUNCT3   0b110
+#define XOR_FUNCT3  0b100
+#define SLT_FUNCT3  0b010
+#define SLTU_FUNCT3 0b011
+#define SRA_FUNCT3  0b101
+#define SRL_FUNCT3  0b101
+#define SLL_FUNCT3  0b001
+
 
 #endif
