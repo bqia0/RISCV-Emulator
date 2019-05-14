@@ -1,3 +1,3 @@
-add x0, x0, x1
-add x1, x1, x1
-add x2, x2, x2
+addi x0, x0, #12
+addi x1, x1, 0x3
+addi x2, x2, #-5
