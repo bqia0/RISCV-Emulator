@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <cstdint>
 
 using namespace std;
 
@@ -29,6 +30,16 @@ char* readFileContents(char* filepath) {
     }
 }
 
+void console() {
+    string input;
+    while(input != "q") {
+        cout << ">> ";
+        cin >> input;
+
+        // TODO: implement some commands here
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         cout << "Please specify a machine code file." << endl;
@@ -37,6 +48,8 @@ int main(int argc, char* argv[]) {
 
     try {
         char* fileContents = readFileContents(argv[1]);
+
+        console();
 
         delete[] fileContents;
     } catch (invalid_argument& e) {
