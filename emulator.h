@@ -2,6 +2,7 @@
 #define EMULATION_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace emulation {
@@ -11,16 +12,16 @@ namespace emulation {
 
     class Emulator {
         private:
-            void printRegisterRow();
-
             uint32_t pc;
             uint32_t* program;
             std::vector<uint32_t> registers;
             
+            void printRegisterRow();
         public:
             Emulator(uint32_t* program, uint32_t initialPC);
             void step();
-            void printRegisters(bool useABINames);
+            void printRegisters(bool useABINames, bool useDecimal);
+            void printRegister(std::string registerName, bool useDecimal);
     };
 }
 

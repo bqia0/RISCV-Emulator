@@ -36,8 +36,8 @@
 #define SR_FUNCT3  0b101
 #define SLL_FUNCT3  0b001
 
-const std::string abi_register_names[] = 
-    {"zero",
+const std::string abi_register_names[] = {
+    "zero",
     "ra",
     "sp",
     "gp",
