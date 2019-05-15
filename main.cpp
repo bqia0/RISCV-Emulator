@@ -3,8 +3,10 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
+#include "emulator.h"
 
 using namespace std;
+using namespace emulation;
 
 uint32_t* readFileContents(char* filepath) {
     ifstream machineFile(filepath, ios::in|ios::binary|ios::ate);
@@ -44,12 +46,15 @@ uint32_t* readFileContents(char* filepath) {
     }
 }
 
-void console() {
+void console(Emulator emulator) {
     string input;
-    while(input != "q") {
+    while (input != "q") {
         cout << ">> ";
         cin >> input;
 
+        if (input == "r" || input == "regs") {
+            emulator.printRegisters();
+        }
         // TODO: implement some commands here
     }
 }
@@ -61,11 +66,11 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        uint32_t* fileContents = readFileContents(argv[1]);
+        uint32_t* program = readFileContents(argv[1]);
+        Emulator emulator(program, 0);
+        console(emulator);
 
-        console();
-
-        delete[] fileContents;
+        delete[] program;
     } catch (invalid_argument& e) {
         cout << "The specified file could not be opened";
         return 0;

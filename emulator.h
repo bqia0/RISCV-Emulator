@@ -9,13 +9,14 @@ namespace emulation {
 
     class Emulator {
         private:
-            uint32_t registers[];
             uint32_t pc;
             uint32_t* program;
+            uint32_t registers[];
             
         public:
             Emulator(uint32_t* program, uint32_t initialPC);
             void step();
+            void printRegisters();
     };
 }
 
