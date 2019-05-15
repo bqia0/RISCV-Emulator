@@ -54,6 +54,10 @@ void console(Emulator emulator) {
 
         if (input == "r" || input == "regs") {
             emulator.printRegisters();
+        } else if (input == "?") {
+            cout << "Lol no help here lmao" << endl;
+        } else {
+            cout << "'" << input << "'" << " is not a command. Type '?' for help." << endl;
         }
         // TODO: implement some commands here
     }
