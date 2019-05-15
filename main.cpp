@@ -20,8 +20,9 @@ char* readFileContents(char* filepath) {
         cout << "File has been read into memory" << endl;
 
         // verification that its reading correctly?
+        cout << "Hex dump of Machine Code:" << endl;
         for (int i = 0; i < fileSize; i++) {
-            cout << setw(2) << setfill('0') << hex << (int) buffer[i] << " "; 
+            cout << setw(2) << setfill('0') << hex  << (0x000000FF & (unsigned int) buffer[i]) << " "; 
         }
         cout << endl;
         return buffer;

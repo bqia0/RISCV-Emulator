@@ -10,6 +10,8 @@ Emulator::Emulator(uint32_t* program, uint32_t initialPC = 0) {
 }
 
 void Emulator::step() {
+
+    // decode
     uint32_t instruction = program[pc];
-    //decode();
+    
 }
