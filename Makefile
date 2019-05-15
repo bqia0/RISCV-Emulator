@@ -18,3 +18,4 @@ assembler.o: assembler.cpp assembleInstructions.h riscv.h
 	$(CXX) $(CXXFLAGS) -c assembler.cpp
 
 assembleInstructions.o: assembleInstructions.h riscv.h
+

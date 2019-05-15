@@ -4,12 +4,13 @@
 #include <bitset>
 
 uint32_t immediateArithmetic(const string & operation, const vector<string> &words){
-    uint8_t rs1, rd, funct3, opcode;
+    uint8_t rs1, rd, funct3, opcode, funct7;
     int16_t imm;
     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
     opcode = OP_IMM;
     funct3 = 0;
+    funct7 = 0;
     imm = parseIImmediate(words[3]);
     if(operation == "addi") {
         funct3 = ADD_FUNCT3;
@@ -24,20 +25,28 @@ uint32_t immediateArithmetic(const string & operation, const vector<string> &wor
     }else if(operation == "sltiu"){
         funct3 = SLTU_FUNCT3;
     }else if(operation == "srai"){
-        funct3 = SRA_FUNCT3;
+        funct7 = 0b0100000;
+        funct3 = SR_FUNCT3;
     }else if(operation == "srli"){
-        funct3 = SRL_FUNCT3;
+        funct7 = 0;
+        funct3 = SR_FUNCT3;
     }else if(operation == "slli"){
+        funct7 = 0;
         funct3 = SLL_FUNCT3;
     }else{
         cout << "Bad Operation " << endl;
     }
-    uint32_t test = opcode | (rd << RD_OFFSET) | 
+
+    if(operation == "srai" || operation == "srli" || operation == "slli"){
+        return opcode | (rd << RD_OFFSET) | 
+        (funct3 << FUNCT3_OFFSET) | 
+        (rs1 << RS1_OFFSET) | ((imm & R_IMM_MASK) << R_IMM_OFFSET) |
+        (funct7 << FUNCT7_OFFSET);
+    }
+
+    return opcode | (rd << RD_OFFSET) | 
     (funct3 << FUNCT3_OFFSET) | 
     (rs1 << RS1_OFFSET) | (imm << I_IMM_OFFSET);
-    // bitset<32> a(test);
-    // cout << a.to_string() << endl;
-    return test;
 }
 
 int isImmediateArithmetic(const string & operation){
@@ -53,6 +62,65 @@ int isImmediateArithmetic(const string & operation){
            return 1;
        }
     return 0;
+}
+
+uint32_t registerArithmetic(const string & operation, const vector<string> &words){
+    uint8_t rs1, rs2, rd, funct3, opcode, funct7;
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
+    rs2 = stoi(words[3].substr(1, words[2].size() - 1));
+    opcode = OP_REG;
+    funct3 = 0;
+    funct7 = 0;
+    if(operation == "add") {
+        funct3 = ADD_FUNCT3;
+    }else if(operation == "sub"){
+        funct3 = ADD_FUNCT3;
+        funct7 = 0b0100000;
+    }else if(operation == "and"){
+        funct3 = AND_FUNCT3;
+    }else if(operation == "or"){
+        funct3 = OR_FUNCT3;
+    }else if(operation == "xor"){
+        funct3 = XOR_FUNCT3;
+    }else if(operation == "slt"){
+        funct3 = SLT_FUNCT3;
+    }else if(operation == "sltu"){
+        funct3 = SLTU_FUNCT3;
+    }else if(operation == "sra"){
+        funct3 = SR_FUNCT3;
+        funct7 = 0b0100000;
+    }else if(operation == "srl"){
+        funct3 = SR_FUNCT3;
+    }else if(operation == "sll"){
+        funct3 = SLL_FUNCT3;
+    }else{
+        cout << "Bad Operation " << endl;
+    }
+    uint32_t test = opcode | (rd << RD_OFFSET) | 
+    (funct3 << FUNCT3_OFFSET) | 
+    (rs1 << RS1_OFFSET) | (rs2 << RS2_OFFSET) |
+    (funct7 << FUNCT7_OFFSET);
+    // bitset<32> a(test);
+    // cout << a.to_string() << endl;
+    return test;
+}
+
+
+int isRegisterArithmetic(const string & operation){
+    if(operation == "add"  ||
+       operation == "sub"  ||
+       operation == "and"  ||
+       operation == "or"   ||
+       operation == "xor"  ||
+       operation == "slt"  ||
+       operation == "sltu" ||
+       operation == "sra"  ||
+       operation == "srl"  ||
+       operation == "sll"){
+           return 1;
+       }
+    return 0;   
 }
 
 uint32_t lui(const vector<string> & words){

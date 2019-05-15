@@ -1,2 +1,2 @@
 # RiscV Simulator
-Assembler....WIP
+Assembler...WIP

@@ -12,5 +12,7 @@ int32_t parseIImmediate(const string & imm);
 int32_t parseUImmediate(const string & imm);
 uint32_t lui(const vector<string> & words);
 uint32_t auipc(const vector<string> & words);
+int isRegisterArithmetic(const string & operation);
+uint32_t registerArithmetic(const string & operation, const vector<string> &words);
 
 #endif
