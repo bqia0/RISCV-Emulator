@@ -12,7 +12,7 @@ Use the make file and type the following command to invoke the makefile.
 make
 ```
 
-This will build the assembler into a file called `assemble`. You can use the assembler to generate a machine file from your RISC-V assembly file, which the emulator can use. In the same directory, call:
+This will build the assembler into a file called `assembler`. You can use the assembler to generate a machine file from your RISC-V assembly file, which the emulator can use. In the same directory, call:
 ```
 ./assembler [assemblyFileLocation] [assemblyFileDestination]
 ```
