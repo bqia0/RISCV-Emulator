@@ -6,7 +6,7 @@
 
 using namespace std;
 
-char* readFileContents(char* filepath) {
+uint32_t* readFileContents(char* filepath) {
     ifstream machineFile(filepath, ios::in|ios::binary|ios::ate);
     if (machineFile.is_open()) {
 
@@ -17,15 +17,28 @@ char* readFileContents(char* filepath) {
         machineFile.read(buffer, fileSize);
         machineFile.close();
 
-        cout << "File has been read into memory" << endl;
-
-        // verification that its reading correctly?
-        cout << "Hex dump of Machine Code:" << endl;
+        // cout << "File size: " << fileSize << endl;
+        cout << "File Hex Dump:" << endl;
         for (int i = 0; i < fileSize; i++) {
             cout << setw(2) << setfill('0') << hex  << (0x000000FF & (unsigned int) buffer[i]) << " "; 
         }
         cout << endl;
-        return buffer;
+
+        int programLength = fileSize / 4;
+        uint32_t* program = new uint32_t[programLength];
+
+        // rearrange into instruction format
+        for(int i = 0; i < programLength; i++) {
+            program[i] = ((0x000000FF & buffer[i * 4]) | 
+               (0x000000FF & buffer[i * 4 + 1]) << 8 | 
+               (0x000000FF & buffer[i * 4 + 2]) << 16 | 
+               (0x000000FF & buffer[i * 4 + 3]) << 24);
+            // cout << setw(8) << setfill('0') << hex << program[i] << endl;
+        }
+
+        delete[] buffer;
+
+        return program;
     } else {
         throw invalid_argument("file could not be opened");
     }
@@ -48,7 +61,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        char* fileContents = readFileContents(argv[1]);
+        uint32_t* fileContents = readFileContents(argv[1]);
 
         console();
 
