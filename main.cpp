@@ -50,13 +50,15 @@ void console(Emulator emulator) {
     string input;
     while (input != "q") {
         cout << ">> ";
-        cin >> input;
+        getline(std::cin, input);
 
         if (input == "r" || input == "regs") {
-            emulator.printRegisters();
+            emulator.printRegisters(false);
+        } else if (input == "r -abi" || input == "regs -abi") { // TODO: use a proper flag/option capture?
+            emulator.printRegisters(true);
         } else if (input == "?") {
             cout << "Lol no help here lmao" << endl;
-        } else {
+        } else if (input != "q") {
             cout << "'" << input << "'" << " is not a command. Type '?' for help." << endl;
         }
         // TODO: implement some commands here
