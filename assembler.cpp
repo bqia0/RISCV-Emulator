@@ -36,8 +36,47 @@ uint32_t instructionToMachineCode(const string& instruction){
         return lui(words);
     }else if (operation == "auipc"){
         return auipc(words);
+    }else if(isRegisterArithmetic(operation)){
+        return registerArithmetic(operation, words);
+    }else{
+        cout << "BAD OPERATION: "<< operation << endl;
+        exit(0);
     }
     //TODO: REST OF OPCODES
+}
+
+int isLabel(const string & instruction){
+    size_t colonIndex;
+    colonIndex = instruction.find(":");
+    if(colonIndex!=string::npos){
+        //cout << instruction << endl;
+        return true;
+    }
+    return false;
+}
+
+/*
+ * Scans file for labels and adds them to an unordered_map 
+ * defined in assembleInstructions.h
+ * unordered_map maps label name to address of label (assuming first address is 0)
+ */
+void scanLabels(ifstream & asmFile){
+    string currentInstruction;
+    unsigned int instruction_counter = 0;
+    while(getline(asmFile, currentInstruction)){
+        if(isLabel(currentInstruction)){
+            if(labels.find(currentInstruction) != labels.end()){
+                cout << "Duplicate Label: " << currentInstruction << endl;
+                exit(0);
+            }else{
+                labels[currentInstruction] = instruction_counter * 4;
+            }
+        }else{
+            instruction_counter++; //labels don't count as instructions
+        }
+    }
+    asmFile.clear() ;
+    asmFile.seekg(0, ios::beg) ;
 }
 
 int main(int argc, char* argv[]){
@@ -47,13 +86,16 @@ int main(int argc, char* argv[]){
     }
     string currentInstruction;
     uint32_t instructionIntOut;
+    uint32_t numInstructions = 0;
     ifstream asmFile(argv[1], ifstream::in);
     ofstream machineFile(argv[2], ofstream::out);
-
+    scanLabels(asmFile);
+    asmFile.seekg(0, ios::beg); //reset ifstream for actual instruction parsing
     while(getline(asmFile, currentInstruction)){
         // TODO: write machine code to file
         instructionIntOut = instructionToMachineCode(currentInstruction);
         machineFile.write((char*)&instructionIntOut, sizeof(uint32_t));
+        numInstructions++;
     }
     return 0;
 }

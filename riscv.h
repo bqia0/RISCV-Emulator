@@ -31,8 +31,17 @@
 #define XOR_FUNCT3  0b100
 #define SLT_FUNCT3  0b010
 #define SLTU_FUNCT3 0b011
-#define SR_FUNCT3  0b101
+#define SR_FUNCT3   0b101
 #define SLL_FUNCT3  0b001
 
+#define LB_FUNCT3   0b000
+#define LW_FUNCT3   0b010
+#define LH_FUNCT3   0b001
+#define LBU_FUNCT3  0b100
+#define LHU_FUNCT3  0b101
+
+#define SW_FUNCT3  0b010
+#define SH_FUNCT3  0b001
+#define SB_FUNCT3  0b000
 
 #endif
