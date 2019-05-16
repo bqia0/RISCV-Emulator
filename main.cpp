@@ -22,8 +22,63 @@ vector<string> split(string str, char delimiter) {
   return internal;
 }
 
-bool hasInCommand(vector<string> stringVector, string target) {
-    return find(stringVector.begin(), stringVector.end(), target) != stringVector.end();
+bool isInTokens(vector<string>& tokenVector, string target) {
+    const vector<string>::iterator iterator = find(tokenVector.begin(), tokenVector.end(), target);
+
+    if (iterator == tokenVector.end()) {
+        return false;
+    } else {
+        tokenVector.erase(iterator);
+        return true;
+    }
+}
+
+string extractCommand(vector<string>& tokenVector) {
+    string command = tokenVector[0];
+    tokenVector.erase(tokenVector.begin());
+    return command;
+}
+
+void console(Emulator emulator) {
+    string input;
+    while (true) {
+        cout << ">> ";
+        getline(cin, input);
+        vector<string> arrayTokens = split(input, ' ');
+
+        if (arrayTokens.size() == 0) continue;
+        string command = extractCommand(arrayTokens);
+
+        // command handlers
+        if (command == "r" || command == "regs") {
+            emulator.printRegisters(isInTokens(arrayTokens, "-abi"), isInTokens(arrayTokens, "-10"));
+        } else if (command == "reg") {
+            if(arrayTokens.size() >= 1) {
+                string registerName = arrayTokens[0];
+                try {
+                    arrayTokens.erase(arrayTokens.begin());
+                    emulator.printRegister(registerName, isInTokens(arrayTokens, "-10"));
+                } catch (const invalid_argument& e) {
+                    cout << "Specified register '" << registerName << "' does not exist." << endl;
+                }
+            } else {
+                cout << "Please specify a register." << endl;
+            }
+        } else if (command == "?") {
+            cout << "Please see the README.md for help on using riscv-emulator." << endl;
+        } else if (command == "quit" || command == "q") {
+            break;
+        } else {
+            cout << "'" << input << "'" << " is not a command. Type '?' for help." << endl;
+        }
+        if (arrayTokens.size() > 0) {
+            cout << "Unrecognized parameters/flags: ";
+            for(vector<string>::iterator it = arrayTokens.begin(); it != arrayTokens.end(); it++) {
+                cout << "'" << *it << "'";
+            }
+            cout << ", which were ignored." << endl;
+        }
+    }
 }
 
 uint32_t* readFileContents(char* filepath) {
@@ -61,37 +116,6 @@ uint32_t* readFileContents(char* filepath) {
         return program;
     } else {
         throw invalid_argument("file could not be opened");
-    }
-}
-
-void console(Emulator emulator) {
-    string input;
-    while (true) {
-        cout << ">> ";
-        getline(cin, input);
-        std::vector<std::string> arrayTokens = split(input, ' ');
-
-        if (arrayTokens.size() == 0) continue;
-        string command = arrayTokens[0];
-
-        // command handlers
-        if (command == "r" || command == "regs") {
-            emulator.printRegisters(hasInCommand(arrayTokens, "-abi"), hasInCommand(arrayTokens, "-10"));
-        } else if (command == "reg") {
-            if(arrayTokens.size() >= 2) {
-                try {
-                    emulator.printRegister(arrayTokens[1], hasInCommand(arrayTokens, "-10"));
-                } catch (const invalid_argument& e) {
-                    cout << "Specified register does not exist." << endl;
-                }
-            }
-        } else if (command == "?") {
-            cout << "Please see the README.md for help on using riscv-emulator." << endl;
-        } else if (command == "quit" || command == "q") {
-            break;
-        } else {
-            cout << "'" << input << "'" << " is not a command. Type '?' for help." << endl;
-        }
     }
 }
 
