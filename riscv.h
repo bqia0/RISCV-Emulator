@@ -3,6 +3,9 @@
 #ifndef RISCV_H_
 #define RISCV_H_
 
+#define REG_COUNT 32
+#define REG_INDEX_BITS 5
+
 // Offsets when converting to machine code
 #define OPCODE_WIDTH 7
 #define RD_OFFSET 7

@@ -64,6 +64,8 @@ void console(Emulator emulator) {
             } else {
                 cout << "Please specify a register." << endl;
             }
+        } else if (command == "s" || command == "step") {
+            emulator.step();
         } else if (command == "c" || command == "count") {
             emulator.printInstructionsExecuted();
         } else if (command == "?") {
@@ -83,7 +85,7 @@ void console(Emulator emulator) {
     }
 }
 
-uint32_t* readFileContents(char* filepath) {
+char* readFileContents(char* filepath) {
     ifstream machineFile(filepath, ios::in|ios::binary|ios::ate);
     if (machineFile.is_open()) {
 
@@ -101,21 +103,21 @@ uint32_t* readFileContents(char* filepath) {
         }
         cout << endl;
 
-        int programLength = fileSize / 4;
-        uint32_t* program = new uint32_t[programLength];
+        // int programLength = fileSize / 4;
+        // char* program = new uint32_t[programLength];
 
-        // rearrange into instruction format
-        for(int i = 0; i < programLength; i++) {
-            program[i] = ((0x000000FF & buffer[i * 4]) | 
-               (0x000000FF & buffer[i * 4 + 1]) << 8 | 
-               (0x000000FF & buffer[i * 4 + 2]) << 16 | 
-               (0x000000FF & buffer[i * 4 + 3]) << 24);
-            // cout << setw(8) << setfill('0') << hex << program[i] << endl;
-        }
+        // // rearrange into instruction format
+        // for(int i = 0; i < programLength; i++) {
+        //     program[i] = ((0x000000FF & buffer[i * 4]) | 
+        //        (0x000000FF & buffer[i * 4 + 1]) << 8 | 
+        //        (0x000000FF & buffer[i * 4 + 2]) << 16 | 
+        //        (0x000000FF & buffer[i * 4 + 3]) << 24);
+        //     // cout << setw(8) << setfill('0') << hex << program[i] << endl;
+        // }
 
-        delete[] buffer;
+        // delete[] buffer;
 
-        return program;
+        return buffer;
     } else {
         throw invalid_argument("file could not be opened");
     }
@@ -128,7 +130,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        uint32_t* program = readFileContents(argv[1]);
+        char* program = readFileContents(argv[1]);
         Emulator emulator(program, 0);
         console(emulator);
 
