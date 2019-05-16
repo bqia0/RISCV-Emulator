@@ -64,6 +64,8 @@ void console(Emulator emulator) {
             } else {
                 cout << "Please specify a register." << endl;
             }
+        } else if (command == "c" || command == "count") {
+            emulator.printInstructionsExecuted();
         } else if (command == "?") {
             cout << "Please see the README.md for help on using riscv-emulator." << endl;
         } else if (command == "quit" || command == "q") {

@@ -8,9 +8,11 @@ using namespace emulation;
 using namespace std;
 
 Emulator::Emulator(uint32_t* program, uint32_t initialPC = 0) {
-    registers = vector<uint32_t>(REG_COUNT);
-    pc = initialPC;
     this->program = program;
+    pc = initialPC;
+
+    registers = vector<uint32_t>(REG_COUNT);
+    instructions_executed = 0;
 }
 
 void Emulator::step() {
@@ -18,6 +20,11 @@ void Emulator::step() {
     // Decode logic
     uint32_t instruction = program[pc];
 
+    instructions_executed++;
+}
+
+void Emulator::printInstructionsExecuted() {
+    cout << instructions_executed << endl;
 }
 
 void Emulator::printRegisters(bool useABINames, bool useDecimal) {

@@ -14,12 +14,14 @@ namespace emulation {
         private:
             uint32_t pc;
             uint32_t* program;
+            uint32_t instructions_executed;
             std::vector<uint32_t> registers;
             
             void printRegisterRow();
         public:
             Emulator(uint32_t* program, uint32_t initialPC);
             void step();
+            void printInstructionsExecuted();
             void printRegisters(bool useABINames, bool useDecimal);
             void printRegister(std::string registerName, bool useDecimal);
     };

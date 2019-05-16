@@ -34,8 +34,9 @@ The emulator currently supports the following commands:
 
 Command | Description
 ---|---
-`r/regs (-abi) (-10)` | prints all registers, optionally with ABI labels, or in base 10.
-`reg [registerName] (-10)` | prints the specified register, optionally in base 10. Accepts ABI or regular register names.
-`q/quit` | quits the emulator.
+`c/count` | Prints how many instructions have been executed.
+`r/regs (-abi) (-10)` | Prints all registers, optionally with ABI labels, or in base 10.
+`reg [registerName] (-10)` | Prints the specified register, optionally in base 10. Accepts ABI or regular register names.
+`q/quit` | Quits the emulator.
 
 
