@@ -3,10 +3,28 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
+#include <iterator>
+#include <algorithm>
 #include "emulator.h"
 
 using namespace std;
 using namespace emulation;
+
+vector<string> split(string str, char delimiter) {
+  vector<string> internal;
+  stringstream ss(str);
+  string tok;
+ 
+  while(getline(ss, tok, delimiter)) {
+    internal.push_back(tok);
+  }
+ 
+  return internal;
+}
+
+bool hasInCommand(vector<string> stringVector, string target) {
+    return find(stringVector.begin(), stringVector.end(), target) != stringVector.end();
+}
 
 uint32_t* readFileContents(char* filepath) {
     ifstream machineFile(filepath, ios::in|ios::binary|ios::ate);
@@ -48,18 +66,32 @@ uint32_t* readFileContents(char* filepath) {
 
 void console(Emulator emulator) {
     string input;
-    while (input != "q") {
+    while (true) {
         cout << ">> ";
-        cin >> input;
+        getline(cin, input);
+        std::vector<std::string> arrayTokens = split(input, ' ');
 
-        if (input == "r" || input == "regs") {
-            emulator.printRegisters();
-        } else if (input == "?") {
-            cout << "Lol no help here lmao" << endl;
+        if (arrayTokens.size() == 0) continue;
+        string command = arrayTokens[0];
+
+        // command handlers
+        if (command == "r" || command == "regs") {
+            emulator.printRegisters(hasInCommand(arrayTokens, "-abi"), hasInCommand(arrayTokens, "-10"));
+        } else if (command == "reg") {
+            if(arrayTokens.size() >= 2) {
+                try {
+                    emulator.printRegister(arrayTokens[1], hasInCommand(arrayTokens, "-10"));
+                } catch (const invalid_argument& e) {
+                    cout << "Specified register does not exist." << endl;
+                }
+            }
+        } else if (command == "?") {
+            cout << "Please see the README.md for help on using riscv-emulator." << endl;
+        } else if (command == "quit" || command == "q") {
+            break;
         } else {
             cout << "'" << input << "'" << " is not a command. Type '?' for help." << endl;
         }
-        // TODO: implement some commands here
     }
 }
 
