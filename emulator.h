@@ -11,15 +11,17 @@ namespace emulation {
 
     class Emulator {
         private:
+            uint32_t instructions_executed;
             uint32_t pc;
             uint8_t* program;
-            uint32_t instructions_executed;
             std::vector<uint32_t> registers;
+            
             void executeIType(uint32_t instruction);
         public:
             Emulator(char* program, uint32_t initialPC);
             void step();
             void printInstructionsExecuted();
+            void printPC();
             void printRegisters(bool useABINames, bool useDecimal);
             void printRegister(std::string registerName, bool useDecimal);
     };

@@ -87,6 +87,10 @@ void Emulator::printInstructionsExecuted() {
     cout << instructions_executed << endl;
 }
 
+void Emulator::printPC() {
+    cout << "0x" << setw(8) << setfill('0') << pc << endl;
+}
+
 void Emulator::printRegisters(bool useABINames, bool useDecimal) {
     for (int i = 0; i < REG_COUNT; i++) {
         if (useABINames) {

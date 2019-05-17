@@ -34,10 +34,9 @@ The emulator currently supports the following commands:
 
 Command | Description
 ---|---
-`s/step` | Steps/executes the next instruction.
 `c/count` | Prints how many instructions have been executed.
+`pc` | Prints the current PC (PC of the next instruction to be executed).
 `r/regs (-abi) (-10)` | Prints all registers, optionally with ABI labels, or in base 10.
 `reg [registerName] (-10)` | Prints the specified register, optionally in base 10. Accepts ABI or regular register names.
+`s/step` | Steps/executes the next instruction.
 `q/quit` | Quits the emulator.
-
-

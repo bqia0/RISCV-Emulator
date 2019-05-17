@@ -64,6 +64,8 @@ void console(Emulator emulator) {
             } else {
                 cout << "Please specify a register." << endl;
             }
+        } else if (command == "pc") {
+            emulator.printPC();
         } else if (command == "s" || command == "step") {
             emulator.step();
         } else if (command == "c" || command == "count") {
