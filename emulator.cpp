@@ -23,33 +23,60 @@ Emulator::Emulator(char* program, uint32_t initialPC = 0) {
     instructions_executed = 0;
 }
 
-void Emulator::step() {
+void Emulator::executeIType(uint32_t instruction) {
+    uint32_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(3);
+    int32_t immediate = ((int32_t) instruction >> I_IMM_OFFSET);
+    uint32_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t funct7 = instruction >> 25;
+    switch (funct3) {
+        case ADD_FUNCT3:
+            // TODO: check for rd == 0, x0 is hardwired to 0 according to ISA spec.
+            registers[rd] = registers[rs1] + immediate;
+            break;
+        case AND_FUNCT3:
+            registers[rd] = registers[rs1] & immediate;
+            break;
+        case OR_FUNCT3:
+            registers[rd] = registers[rs1] | immediate;
+            break;
+        case XOR_FUNCT3:
+            registers[rd] = registers[rs1] ^ immediate;
+            break;
+        case SLT_FUNCT3:
+            registers[rd] = (int32_t) registers[rs1] < immediate;
+            break;
+        case SLTU_FUNCT3:
+            registers[rd] = registers[rs1] < (uint32_t) immediate;
+            break;
+        case SR_FUNCT3:
+            if (funct7 == 0b0100000) { // SRAI
+                registers[rd] = ((int32_t) registers[rs1]) >> (uint32_t) immediate;
+            } else if (funct7 == 0b0000000) { //SRLI
+                registers[rd] = registers[rs1] >> (uint32_t) immediate;
+            }
+            break;
+        case SLL_FUNCT3:
+            registers[rd] = registers[rs1] << (uint32_t) immediate;
+            break;
+        default:
+            cout << "unrecognized I-type instruction";
+    }
+}
 
-    // Decode logic
+void Emulator::step() {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
                (0x000000FF & program[pc + 1]) << 8 | 
                (0x000000FF & program[pc + 2]) << 16 | 
                (0x000000FF & program[pc + 3]) << 24);
 
-    uint32_t opcode = instruction & getLSBMask(OPCODE_WIDTH); // bitmask will not work if OPCODE_WIDTH = 32;
-
     cout << setw(8) << setfill('0') << hex << pc;
     cout << ": " << setw(8) << setfill('0') << hex << instruction << " | ";
-    if (opcode == OP_IMM) { // I-type instructions
-        uint32_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(3);
-        int32_t immediate = ((int32_t) instruction >> I_IMM_OFFSET);
-        uint32_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
-        uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
 
-        switch (funct3) {
-            case ADD_FUNCT3:
-                // TODO: check for rd == 0, x0 is hardwired to 0 according to ISA spec.
-                registers[rd] = registers[rs1] + immediate;
-                break;
-            default:
-                cout << "unrecognized I-type instruction";
-        }
-    }
+    uint32_t opcode = instruction & getLSBMask(OPCODE_WIDTH); // bitmask will not work if OPCODE_WIDTH = 32;
+
+    if (opcode == OP_IMM) executeIType(instruction);
+
     cout << endl;
 
     pc = pc + 4;
