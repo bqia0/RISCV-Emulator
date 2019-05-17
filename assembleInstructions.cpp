@@ -167,66 +167,114 @@ int32_t parseUImmediate(const string & imm){
     }    
 }
 
-// TODO: Actual support for proper loads and stores
+uint32_t load(const string & operation, const vector<string> &words){
+    uint8_t rs1, rd, funct3, opcode;
+    int16_t imm;
+    size_t open_paren, close_paren;
+    string rs1_string, imm_string;
 
-// uint32_t load(const string & operation, const vector<string> &words){
-//     uint8_t rs1, rd, funct3, opcode, funct7;
-//     int16_t imm;
-//     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
-//     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
-//     opcode = OP_LOAD;
-//     funct3 = 0;
-//     imm = parseIImmediate(words[3]);
+    // Process source register and immediate
+    string sourceRegAndImm = words[2];
+    open_paren = sourceRegAndImm.find('(');
+    close_paren = sourceRegAndImm.find(')');
+    if(open_paren == string::npos || close_paren == string::npos){
+        cout << "Bad Load Immediate " << endl; //TODO add more descriptive message
+        exit(0);
+    }
+    imm_string = sourceRegAndImm.substr(0, open_paren);
+    rs1_string = sourceRegAndImm.substr(open_paren + 2, close_paren - open_paren - 2); //-2 to skip the paren and the leading x
 
-//     if(operation == "lw"){
-//         funct3 = LW_FUNCT3;
-//     }else if (operation == "lb"){
-//         funct3 = LB_FUNCT3;
-//     }else if(operation == "lh"){
-//         funct3 = LH_FUNCT3;
-//     }else if(operation == "lbu"){
-//         funct3 = LBU_FUNCT3;
-//     }else if(operation == "lhu"){
-//         funct3 = LHU_FUNCT3;
-//     }else{
-//         cout << "Bad Load Instruction" << endl;
-//         exit(0);
-//     }
-//     return opcode | (rd << RD_OFFSET) | 
-//     (funct3 << FUNCT3_OFFSET) | 
-//     (rs1 << RS1_OFFSET) | (imm << I_IMM_OFFSET);    
-// }
+    if(imm_string.size() > 2 && imm_string.substr(0, 2) == "0x"){
+        imm = stoi(imm_string, NULL, 16);
+    }else{
+        imm = stoi(imm_string, NULL, 10);
+    }
 
-// uint32_t store(const string & operation, const vector<string> &words){
-//     uint8_t rs1, rd, funct3, opcode, funct7;
-//     int16_t imm;
-//     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
-//     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
-//     opcode = OP_LOAD;
-//     funct3 = 0;
-//     if(operation == "sw"){
-//         funct3 = SW_FUNCT3;
-//     }else if (operation == "sh"){
-//         funct3 = SH_FUNCT3;
-//     }else if(operation == "sb"){
-//         funct3 = SB_FUNCT3;
-//     }else{
-//         cout << "Bad Store Instruction" << endl;
-//         exit(0);
-//     }
-//     return opcode | 
-// }
+    rs1 = stoi(rs1_string);
 
-// // S type immediate is bottom 12 bits with 13 bits in between
-// int32_t parseSImmediate(const string & imm){
-//     int32_t fullImmediate;
-//     if(imm.substr(0, 2) == "0x"){
-//        fullImmediate = stoi(imm, NULL, 16);
-//     }else if (imm[0] == '#'){
-//        fullImmediate = stoi(imm.substr(1, imm.size() - 1));
-//     }else{
-//         cout << "Invalid Store Immediate Type" << endl; //TODO Give a more descriptive message
-//         exit(0);
-//     }    
-//     return (fullImmediate & 0x1F) | ((fullImmediate & 0xFE0) << 25);
-// }
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    opcode = OP_LOAD;
+    funct3 = 0;
+
+    if(operation == "lw"){
+        funct3 = LW_FUNCT3;
+    }else if (operation == "lb"){
+        funct3 = LB_FUNCT3;
+    }else if(operation == "lh"){
+        funct3 = LH_FUNCT3;
+    }else if(operation == "lbu"){
+        funct3 = LBU_FUNCT3;
+    }else if(operation == "lhu"){
+        funct3 = LHU_FUNCT3;
+    }else{
+        cout << "Bad Load Instruction" << endl;
+        exit(0);
+    }
+    uint32_t test = opcode | (rd << RD_OFFSET) | 
+    (funct3 << FUNCT3_OFFSET) | 
+    (rs1 << RS1_OFFSET) | (imm << I_IMM_OFFSET);  
+    return test;
+}
+
+uint32_t store(const string & operation, const vector<string> &words){
+    uint8_t rs1, rs2, funct3, opcode;
+    uint32_t imm;
+    size_t open_paren, close_paren;
+    string rs1_string, imm_string;
+
+    // Process source registers and immediate
+    string sourceRegAndImm = words[2];
+    open_paren = sourceRegAndImm.find('(');
+    close_paren = sourceRegAndImm.find(')');
+    if(open_paren == string::npos || close_paren == string::npos){
+        cout << "Bad Load Immediate " << endl; //TODO add more descriptive message
+        exit(0);
+    }
+
+    imm_string = sourceRegAndImm.substr(0, open_paren);
+    rs1_string = sourceRegAndImm.substr(open_paren + 2, close_paren - open_paren - 2); //-2 to skip the paren and the leading x
+
+
+    imm = parseSImmediate(imm_string);
+    cout << imm << endl;
+    rs1 = stoi(rs1_string);
+    rs2 = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    opcode = OP_STORE;
+    funct3 = 0;
+
+    if(operation == "sw"){
+        funct3 = SW_FUNCT3;
+    }else if (operation == "sh"){
+        funct3 = SH_FUNCT3;
+    }else if(operation == "sb"){
+        funct3 = SB_FUNCT3;
+    }else{
+        cout << "Bad Store Instruction" << endl;
+        exit(0);
+    }
+    uint32_t test =  opcode | imm | 
+    (funct3 << FUNCT3_OFFSET) | (rs1 << RS1_OFFSET) |
+    (rs2 << RS2_OFFSET);
+    cout << test << endl;  
+    return test;
+}
+
+// S type immediate is bottom 12 bits with 13 bits in between
+uint32_t parseSImmediate(const string & imm){
+    uint32_t fullImmediate;
+    if(imm.size() > 2 && imm.substr(0, 2) == "0x"){
+       fullImmediate = stoi(imm, NULL, 16);
+    }else{
+       fullImmediate = stoi(imm, NULL, 10);
+    }    
+    return ((fullImmediate & 0x01F) << 7) | ((fullImmediate & 0xFE0) << 20);
+}
+
+
+int isLoad(const string & operation){
+    if(operation == "lw" || operation == "lh" || 
+    operation=="lb"|| operation == "lbu" || operation == "lhu"){
+        return 1;
+    }
+    return 0;
+}
