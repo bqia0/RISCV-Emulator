@@ -67,7 +67,7 @@ void console(Emulator emulator) {
         } else if (command == "pc") {
             emulator.printPC();
         } else if (command == "s" || command == "step") {
-            emulator.step();
+            emulator.step(isInTokens(arrayTokens, "-d"));
         } else if (command == "c" || command == "count") {
             emulator.printInstructionsExecuted();
         } else if (command == "?") {

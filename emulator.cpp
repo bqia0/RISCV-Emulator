@@ -60,24 +60,24 @@ void Emulator::executeIType(uint32_t instruction) {
             registers[rd] = registers[rs1] << (uint32_t) immediate;
             break;
         default:
-            cout << "unrecognized I-type instruction";
+            cout << "warning: unrecognized I-type instruction" << endl;
     }
 }
 
-void Emulator::step() {
+void Emulator::step(bool inDebugMode) {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
                (0x000000FF & program[pc + 1]) << 8 | 
                (0x000000FF & program[pc + 2]) << 16 | 
                (0x000000FF & program[pc + 3]) << 24);
 
-    cout << setw(8) << setfill('0') << hex << pc;
-    cout << ": " << setw(8) << setfill('0') << hex << instruction << " | ";
+    if (inDebugMode) {
+        cout << setw(8) << setfill('0') << hex << pc;
+        cout << ": " << setw(8) << setfill('0') << hex << instruction << " " << endl;
+    }
 
     uint32_t opcode = instruction & getLSBMask(OPCODE_WIDTH); // bitmask will not work if OPCODE_WIDTH = 32;
 
     if (opcode == OP_IMM) executeIType(instruction);
-
-    cout << endl;
 
     pc = pc + 4;
     instructions_executed++;

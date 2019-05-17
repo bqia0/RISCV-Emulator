@@ -19,7 +19,7 @@ namespace emulation {
             void executeIType(uint32_t instruction);
         public:
             Emulator(char* program, uint32_t initialPC);
-            void step();
+            void step(bool inDebugMode);
             void printInstructionsExecuted();
             void printPC();
             void printRegisters(bool useABINames, bool useDecimal);

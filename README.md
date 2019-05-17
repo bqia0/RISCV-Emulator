@@ -38,5 +38,5 @@ Command | Description
 `pc` | Prints the current PC (PC of the next instruction to be executed).
 `r/regs (-abi) (-10)` | Prints all registers, optionally with ABI labels, or in base 10.
 `reg [registerName] (-10)` | Prints the specified register, optionally in base 10. Accepts ABI or regular register names.
-`s/step` | Steps/executes the next instruction.
+`s/step (-d)` | Steps/executes the next instruction, optionally with additional details.
 `q/quit` | Quits the emulator.
