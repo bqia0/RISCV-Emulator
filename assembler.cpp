@@ -31,13 +31,17 @@ uint32_t instructionToMachineCode(const string& instruction){
     transform(operation.begin(), operation.end(), operation.begin(), ::tolower);
 
     if(isImmediateArithmetic(operation)){
-        return immediateArithmetic(operation, words);
+        return immediateArithmetic(operation, words); //TODO: refactor functions to only take word array
     }else if(operation == "lui"){
         return lui(words);
     }else if (operation == "auipc"){
         return auipc(words);
     }else if(isRegisterArithmetic(operation)){
         return registerArithmetic(operation, words);
+    }else if(isLoad(operation)){
+        return load(operation, words);
+    }else if(operation == "sw" || operation == "sh" || operation == "sb"){
+        return store(operation, words);
     }else{
         cout << "BAD OPERATION: "<< operation << endl;
         exit(0);
