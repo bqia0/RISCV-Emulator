@@ -67,7 +67,19 @@ void console(Emulator emulator) {
         } else if (command == "pc") {
             emulator.printPC();
         } else if (command == "s" || command == "step") {
-            emulator.step(isInTokens(arrayTokens, "-d"));
+            bool inDebugMode = isInTokens(arrayTokens, "-d");
+            if(arrayTokens.size() >= 1) {
+                string argument = arrayTokens[0];
+                try {
+                    arrayTokens.erase(arrayTokens.begin());
+                    int steps = stoi(argument);
+                    emulator.stepMultiple(steps, inDebugMode);
+                } catch (const invalid_argument& e) {
+                    cout << "Illegal argument '" << argument << "'." << endl;
+                }
+            } else {
+                emulator.step(inDebugMode);
+            }
         } else if (command == "c" || command == "count") {
             emulator.printInstructionsExecuted();
         } else if (command == "?") {
@@ -80,9 +92,9 @@ void console(Emulator emulator) {
         if (arrayTokens.size() > 0) {
             cout << "Unrecognized parameters/flags: ";
             for(vector<string>::iterator it = arrayTokens.begin(); it != arrayTokens.end(); it++) {
-                cout << "'" << *it << "'";
+                cout << "'" << *it << "',";
             }
-            cout << ", which were ignored." << endl;
+            cout << " which were ignored." << endl;
         }
     }
 }

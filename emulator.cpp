@@ -83,6 +83,15 @@ void Emulator::step(bool inDebugMode) {
     instructions_executed++;
 }
 
+void Emulator::stepMultiple(int steps, bool inDebugMode) {
+    if (steps < 0) {
+        throw invalid_argument("# of steps cannot be negative.");
+    }
+    for(int i = 0; i < steps; i++) {
+        step(inDebugMode);
+    }
+}
+
 void Emulator::printInstructionsExecuted() {
     cout << instructions_executed << endl;
 }
