@@ -29,6 +29,7 @@ void Emulator::executeIType(uint32_t instruction) {
     uint32_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
     uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
     uint32_t funct7 = instruction >> 25;
+    uint32_t shiftAmount = immediate & getLSBMask(5);
     switch (funct3) {
         case ADD_FUNCT3:
             // TODO: check for rd == 0, x0 is hardwired to 0 according to ISA spec.
@@ -51,13 +52,13 @@ void Emulator::executeIType(uint32_t instruction) {
             break;
         case SR_FUNCT3:
             if (funct7 == 0b0100000) { // SRAI
-                registers[rd] = ((int32_t) registers[rs1]) >> (uint32_t) immediate;
+                registers[rd] = ((int32_t) registers[rs1]) >> shiftAmount;
             } else if (funct7 == 0b0000000) { //SRLI
-                registers[rd] = registers[rs1] >> (uint32_t) immediate;
+                registers[rd] = registers[rs1] >> shiftAmount;
             }
             break;
         case SLL_FUNCT3:
-            registers[rd] = registers[rs1] << (uint32_t) immediate;
+            registers[rd] = registers[rs1] << shiftAmount;
             break;
         default:
             cout << "warning: unrecognized I-type instruction" << endl;
