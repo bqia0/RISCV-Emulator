@@ -17,6 +17,7 @@ namespace emulation {
             std::vector<uint32_t> registers;
             
             void executeIType(uint32_t instruction);
+            void executeRtype(uint32_t instruction);
         public:
             Emulator(char* program, uint32_t initialPC);
             void step(bool inDebugMode);

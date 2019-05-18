@@ -64,6 +64,52 @@ void Emulator::executeIType(uint32_t instruction) {
     }
 }
 
+void Emulator::executeRtype(uint32_t instruction) {
+    uint32_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(3);
+    uint32_t rs2 = (instruction >> RS2_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t funct7 = instruction >> 25;
+
+    uint32_t shiftAmount = registers[rs2] & getLSBMask(SHIFT_AMOUNT_SIZE);
+    switch (funct3) {
+        case ADD_FUNCT3:
+            if (funct7 == 0b0100000) { // SUB
+                registers[rd] = registers[rs1] - registers[rs2];
+            } else if (funct7 == 0b0000000) { // ADD
+                registers[rd] = registers[rs1] + registers[rs2];
+            }
+            break;
+        case AND_FUNCT3:
+            registers[rd] = registers[rs1] & registers[rs2];
+            break;
+        case OR_FUNCT3:
+            registers[rd] = registers[rs1] | registers[rs2];
+            break;
+        case XOR_FUNCT3:
+            registers[rd] = registers[rs1] ^ registers[rs2];
+            break;
+        case SLT_FUNCT3:
+            registers[rd] = (int32_t) registers[rs1] < (int32_t) registers[rs2];
+            break;
+        case SLTU_FUNCT3:
+            registers[rd] = registers[rs1] < registers[rs2];
+            break;
+        case SLL_FUNCT3:
+            registers[rd] = registers[rs1] << shiftAmount;
+            break;
+        case SR_FUNCT3:
+            if (funct7 == 0b0100000) { // SRA
+                registers[rd] = (int32_t) registers[rs1] >> shiftAmount;
+            } else { // SRL
+                registers[rd] = registers[rs1] >> shiftAmount;
+            }
+            break;
+        default:
+            cout << "warning: unrecognized I-type instruction" << endl;
+    }
+}
+
 void Emulator::step(bool inDebugMode) {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
                (0x000000FF & program[pc + 1]) << 8 | 
@@ -78,6 +124,7 @@ void Emulator::step(bool inDebugMode) {
     uint32_t opcode = instruction & getLSBMask(OPCODE_WIDTH); // bitmask will not work if OPCODE_WIDTH = 32;
 
     if (opcode == OP_IMM) executeIType(instruction);
+    if (opcode == OP_REG) executeRtype(instruction);
 
     pc = pc + 4;
     instructions_executed++;
