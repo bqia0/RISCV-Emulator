@@ -70,7 +70,7 @@ uint32_t registerArithmetic(const string & operation, const vector<string> &word
     uint8_t rs1, rs2, rd, funct3, opcode, funct7;
     rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
     rs1 = stoi(words[2].substr(1, words[2].size() - 1)); //remove the leading x
-    rs2 = stoi(words[3].substr(1, words[2].size() - 1));
+    rs2 = stoi(words[3].substr(1, words[3].size() - 1));
     opcode = OP_REG;
     funct3 = 0;
     funct7 = 0;
@@ -236,7 +236,6 @@ uint32_t store(const string & operation, const vector<string> &words){
 
 
     imm = parseSImmediate(imm_string);
-    cout << imm << endl;
     rs1 = stoi(rs1_string);
     rs2 = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
     opcode = OP_STORE;
@@ -255,8 +254,48 @@ uint32_t store(const string & operation, const vector<string> &words){
     uint32_t test =  opcode | imm | 
     (funct3 << FUNCT3_OFFSET) | (rs1 << RS1_OFFSET) |
     (rs2 << RS2_OFFSET);
-    cout << test << endl;  
     return test;
+}
+
+uint32_t branch(const vector<string> &words){
+    uint8_t rs1, rs2, funct3, opcode;
+    uint32_t imm;
+    string immString;
+    string operation; 
+    operation = words[0];
+    immString = words[3];
+    imm = parseBImmediate(immString);
+    rs1 = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    rs2 = stoi(words[2].substr(1, words[2].size() - 1)); 
+    opcode = OP_BR;
+    funct3 = 0;
+    if(operation == "beq"){
+        funct3 = BEQ_FUNCT3;
+    }else if(operation == "bne"){
+        funct3 = BNE_FUNCT3;
+    }else if(operation == "blt"){
+        funct3 = BLT_FUNCT3;
+    }else if(operation == "bge"){
+        funct3 = BGE_FUNCT3;
+    }else if(operation == "bltu"){
+        funct3 = BLTU_FUNCT3;
+    }else if(operation == "bgeu"){
+        funct3 = BGEU_FUNCT3;
+    }else{
+        cout << "Bad Branch Operation: " << words[0] << endl;
+    }
+    return opcode | imm | (funct3 << FUNCT3_OFFSET) |
+    (rs1 << RS1_OFFSET) | (rs2 << RS2_OFFSET); 
+}
+
+uint32_t parseBImmediate(const string & imm){
+    uint32_t fullImmediate;
+    if(imm.size() > 2 && imm.substr(0, 2) == "0x"){
+       fullImmediate = stoi(imm, NULL, 16);
+    }else{
+       fullImmediate = stoi(imm, NULL, 10);
+    }
+    return ((fullImmediate & 0x01F) << 7) | ((fullImmediate & 0xFE0) << 20);     
 }
 
 // S type immediate is bottom 12 bits with 13 bits in between
@@ -276,5 +315,13 @@ int isLoad(const string & operation){
     operation=="lb"|| operation == "lbu" || operation == "lhu"){
         return 1;
     }
+    return 0;
+}
+
+int isBranch(const string & operation){
+    if(operation == "beq" || operation == "bne" || operation == "blt" ||
+       operation == "bge" || operation == "bltu" || operation == "bgeu"){
+           return 1;
+       }
     return 0;
 }

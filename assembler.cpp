@@ -42,6 +42,8 @@ uint32_t instructionToMachineCode(const string& instruction){
         return load(operation, words);
     }else if(operation == "sw" || operation == "sh" || operation == "sb"){
         return store(operation, words);
+    }else if(isBranch(operation)){
+        return branch(words);
     }else{
         cout << "BAD OPERATION: "<< operation << endl;
         exit(0);
