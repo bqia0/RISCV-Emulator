@@ -141,11 +141,11 @@ void Emulator::stepMultiple(int steps, bool inDebugMode) {
 }
 
 void Emulator::printInstructionsExecuted() {
-    cout << instructions_executed << endl;
+    cout << dec << instructions_executed << dec << endl;
 }
 
 void Emulator::printPC() {
-    cout << "0x" << setw(8) << setfill('0') << pc << endl;
+    cout << "0x" << setw(8) << setfill('0') << hex << pc << endl;
 }
 
 void Emulator::printRegisters(bool useABINames, bool useDecimal) {
@@ -156,9 +156,9 @@ void Emulator::printRegisters(bool useABINames, bool useDecimal) {
             cout << setw(5) << setfill(' ') << right << ("x" + to_string(i));
         }
         if (useDecimal) {
-            cout << ": " << setw(10) << setfill(' ') << registers[i];
+            cout << ": " << setw(10) << setfill(' ') << dec << registers[i];
         } else { // TODO: Decide if we need to handle unsigned/signed
-            cout << ": " << "0x" << setw(8) << setfill('0') << registers[i];
+            cout << ": " << "0x" << setw(8) << setfill('0') << hex << registers[i];
         }
         if ((i + 1) % REG_PRINT_COL_WIDTH == 0) {
             cout << endl;
