@@ -295,7 +295,22 @@ uint32_t parseBImmediate(const string & imm){
     }else{
        fullImmediate = stoi(imm, NULL, 10);
     }
-    return ((fullImmediate & 0x01F) << 7) | ((fullImmediate & 0xFE0) << 20);     
+    return ((BV(11) & fullImmediate) >> 5) | ((fullImmediate & 0x1E) << 7) | ((fullImmediate & 0x7E0) << 20) | 
+    ((BV(12) & fullImmediate) << 19);   
+}
+
+uint32_t parseJImmediate(const string & imm){
+    uint32_t fullImmediate;
+    if(imm.size() > 2 && imm.substr(0, 2) == "0x"){
+       fullImmediate = stoi(imm, NULL, 16);
+    }else{
+       fullImmediate = stoi(imm, NULL, 10);
+    }
+    cout << imm << endl;
+    uint32_t test = (fullImmediate & 0xFF000) | (fullImmediate & BV(11) << 9) | ((fullImmediate & 0x7FE) << 20) | 
+    ((BV(20) & fullImmediate) << 11);   
+    cout << test << endl;
+    return test;
 }
 
 // S type immediate is bottom 12 bits with 13 bits in between
@@ -324,4 +339,31 @@ int isBranch(const string & operation){
            return 1;
        }
     return 0;
+}
+
+uint32_t jal(const vector<string> &words){
+    uint8_t rd, opcode;
+    uint32_t imm;
+    string immString;
+
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    immString = words[2];
+    imm = parseJImmediate(immString);
+    opcode = OP_JAL;
+    return opcode | (rd << RD_OFFSET) | imm;
+}
+
+uint32_t jalr(const vector<string> &words){
+    uint8_t rd, rs1, opcode;
+    uint32_t imm;
+    string immString;
+
+    rd = stoi(words[1].substr(1, words[1].size() - 1)); //remove the leading x
+    rs1 = stoi(words[2].substr(1, words[2].size() - 1));
+    immString = words[3];
+    imm = parseIImmediate(immString);
+    opcode = OP_JALR;
+
+    return opcode | (rd << RD_OFFSET) | (0b000 << 12) | (rs1 << RS1_OFFSET)
+    | (imm << I_IMM_OFFSET);
 }
