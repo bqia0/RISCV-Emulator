@@ -51,6 +51,13 @@
 #define SH_FUNCT3  0b001
 #define SB_FUNCT3  0b000
 
+#define BEQ_FUNCT3  0b000
+#define BNE_FUNCT3  0b001
+#define BLT_FUNCT3  0b100
+#define BGE_FUNCT3  0b101
+#define BLTU_FUNCT3 0b110
+#define BGEU_FUNCT3 0b111
+
 const std::string abi_register_names[] = {
     "zero",
     "ra",
