@@ -116,6 +116,12 @@ void Emulator::executeLUI(uint32_t instruction) {
     registers[rd] = (instruction >> U_IMM_OFFSET) << U_IMM_OFFSET;
 }
 
+void Emulator::executeAUIPC(uint32_t instruction) {
+    uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint32_t immediate = (instruction >> U_IMM_OFFSET) << U_IMM_OFFSET;
+    registers[rd] = pc + immediate;
+}
+
 void Emulator::step(bool inDebugMode) {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
                (0x000000FF & program[pc + 1]) << 8 | 
@@ -132,6 +138,7 @@ void Emulator::step(bool inDebugMode) {
     if (opcode == OP_IMM) executeIType(instruction);
     if (opcode == OP_REG) executeRtype(instruction);
     if (opcode == OP_LUI) executeLUI(instruction);
+    if (opcode == OP_AUIPC) executeAUIPC(instruction);
 
     pc = pc + 4;
     instructions_executed++;
