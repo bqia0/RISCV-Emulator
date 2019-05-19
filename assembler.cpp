@@ -13,10 +13,7 @@ uint32_t instructionToMachineCode(const string& instruction){
     stringstream ss(instruction);
     string currWord;
     string operation;
-    uint8_t opcode;
     string token;
-    uint8_t rs0, rs1, rs2, rd;
-    int16_t imm;
     vector<string> words;
 
     // convert current instruction into vector of words
@@ -44,18 +41,20 @@ uint32_t instructionToMachineCode(const string& instruction){
         return store(operation, words);
     }else if(isBranch(operation)){
         return branch(words);
+    }else if(operation == "jal"){
+        return jal(words);
+    }else if(operation == "jalr"){
+        return jalr(words);
     }else{
         cout << "BAD OPERATION: "<< operation << endl;
         exit(0);
     }
-    //TODO: REST OF OPCODES
 }
 
 int isLabel(const string & instruction){
     size_t colonIndex;
     colonIndex = instruction.find(":");
     if(colonIndex!=string::npos){
-        //cout << instruction << endl;
         return true;
     }
     return false;
@@ -78,7 +77,8 @@ void scanLabels(ifstream & asmFile){
                 labels[currentInstruction] = instruction_counter * 4;
             }
         }else{
-            instruction_counter++; //labels don't count as instructions
+             //labels don't count as instructions and therefore don't take memory
+            instruction_counter++;
         }
     }
     asmFile.clear() ;
@@ -98,7 +98,6 @@ int main(int argc, char* argv[]){
     scanLabels(asmFile);
     asmFile.seekg(0, ios::beg); //reset ifstream for actual instruction parsing
     while(getline(asmFile, currentInstruction)){
-        // TODO: write machine code to file
         instructionIntOut = instructionToMachineCode(currentInstruction);
         machineFile.write((char*)&instructionIntOut, sizeof(uint32_t));
         numInstructions++;
