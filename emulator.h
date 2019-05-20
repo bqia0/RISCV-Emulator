@@ -20,6 +20,7 @@ namespace emulation {
             void executeRtype(uint32_t instruction);
             void executeLUI(uint32_t instruction);
             void executeAUIPC(uint32_t instruction);
+            void executeJALR(uint32_t instruction);
         public:
             Emulator(char* program, uint32_t initialPC);
             void step(bool inDebugMode);

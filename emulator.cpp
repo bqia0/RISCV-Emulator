@@ -19,7 +19,7 @@ Emulator::Emulator(char* program, uint32_t initialPC = 0) {
     this->program = (uint8_t*) program; // potential bug if char is not 8 bits?
     pc = initialPC;
 
-    registers = vector<uint32_t>(REG_COUNT);
+    registers = vector<uint32_t>(REG_COUNT, 0);
     instructions_executed = 0;
 }
 
@@ -63,6 +63,7 @@ void Emulator::executeIType(uint32_t instruction) {
         default:
             cout << "warning: unrecognized I-type instruction" << endl;
     }
+    pc = pc + 4;
 }
 
 void Emulator::executeRtype(uint32_t instruction) {
@@ -109,18 +110,30 @@ void Emulator::executeRtype(uint32_t instruction) {
         default:
             cout << "warning: unrecognized I-type instruction" << endl;
     }
+    pc = pc + 4;
 }
 
 void Emulator::executeLUI(uint32_t instruction) {
     uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
     registers[rd] = (instruction >> U_IMM_OFFSET) << U_IMM_OFFSET;
+    pc = pc + 4;
 }
 
 void Emulator::executeAUIPC(uint32_t instruction) {
     uint32_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
     uint32_t immediate = (instruction >> U_IMM_OFFSET) << U_IMM_OFFSET;
     registers[rd] = pc + immediate;
+    pc = pc + 4;
 }
+
+void Emulator::executeJALR(uint32_t instruction){
+    uint8_t rd = (instruction >> RD_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint8_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    int32_t imm = ((int32_t)instruction >> I_IMM_OFFSET);
+    registers[rd] = pc + 4;
+    pc = (registers[rs1] + imm) & 0xFFFFFFFE;
+}
+
 
 void Emulator::step(bool inDebugMode) {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
@@ -140,7 +153,6 @@ void Emulator::step(bool inDebugMode) {
     if (opcode == OP_LUI) executeLUI(instruction);
     if (opcode == OP_AUIPC) executeAUIPC(instruction);
 
-    pc = pc + 4;
     instructions_executed++;
 }
 

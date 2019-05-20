@@ -1,29 +1,25 @@
 # RiscV Emulator
-- Assembler...WIP
+- Assembler...Basic instructions without labels or P-Ops
 - Emulator...basic framework created
 
 ## Usage
 
 To use compile this project from source, clone this repository onto your local machine. You will need `clang`.
 
-### Building and Using the Assembler
+### Building the Assembler and Emulator
 Use the make file and type the following command to invoke the makefile.
 ```
 make
 ```
 
-This will build the assembler into a file called `assembler`. You can use the assembler to generate a machine file from your RISC-V assembly file, which the emulator can use. In the same directory, call:
+### Using the Assembler
+Assemble your assembly file to machine code by calling:
 ```
 ./assembler [assemblyFileLocation] [assemblyFileDestination]
 ```
 
-### Building and Starting the Emulator
-In the repository directory, type the following command to assembler the emulator.
-```
-clang++ -Wall -std=c++14 emulator.cpp main.cpp -o [desiredFileDestination]
-```
-
-With a machine file generated and the emulator compiled, you are now ready to begin emulation! You can begin using your emulator with the following command:
+### Starting the Emulator
+With a machine file generated, you are now ready to begin emulation! You can begin using your emulator with the following command:
 ```
 [emulatorFileLocation] [machineFileLocation]
 ```
