@@ -20,6 +20,7 @@
 #define R_IMM_MASK 0x1F
 #define S_IMM_OFFSET 7
 #define J_IMM_OFFSET 12
+#define B_IMM_MASK 0xFE000F80
 
 // Opcodes
 #define OP_IMM    0b0010011

@@ -1,4 +1,4 @@
-# RiscV Emulator
+# RISCV Emulator
 - Assembler...Basic instructions without labels or P-Ops
 - Emulator...basic framework created
 

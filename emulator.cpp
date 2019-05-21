@@ -15,6 +15,12 @@ uint32_t getLSBMask(uint32_t numberOfBits) {
     }
 }
 
+// both inclusive
+uint32_t bitMask(int start, int end){
+    int length = end - start + 1;
+    return (((uint32_t) 1 << length) - 1) << start;
+}
+
 Emulator::Emulator(char* program, uint32_t initialPC = 0) {
     this->program = (uint8_t*) program; // potential bug if char is not 8 bits?
     pc = initialPC;
@@ -134,6 +140,48 @@ void Emulator::executeJALR(uint32_t instruction){
     pc = (registers[rs1] + imm) & 0xFFFFFFFE;
 }
 
+void Emulator::executeBranch(uint32_t instruction){
+    uint8_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    uint8_t rs2 = (instruction >> RS2_OFFSET) & getLSBMask(REG_INDEX_BITS);
+    int32_t imm = BImm(instruction);
+    uint8_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(FUNCT3_BITS);
+    bool branch = false;
+    switch(funct3){
+        case BEQ_FUNCT3:
+            branch = registers[rs1] == registers[rs2];
+            break;
+        case BNE_FUNCT3:
+            branch = registers[rs1] != registers[rs2];
+            break;
+        case BLT_FUNCT3:
+            branch = (int32_t) registers[rs1] < (int32_t) registers[rs2];
+            break;
+        case BGE_FUNCT3:
+            branch =  (int32_t) registers[rs1] >= (int32_t) registers[rs2];
+            break;
+        case BLTU_FUNCT3:
+            branch = registers[rs1] < registers[rs2];
+            break;
+        case BGEU_FUNCT3:
+            branch =  registers[rs1] >= registers[rs2];
+            break;
+        default:
+            cout << "Branch instruction has bad FUNCT3: " << funct3 << endl;
+            break;
+    }
+    if(branch){
+        pc = pc + imm;
+    }else{
+        pc = pc + 4;
+    }
+}
+
+int16_t BImm(uint32_t instruction){
+    return ((instruction & bitmask(8, 11)) >> 7) | 
+    ((instruction & bitmask(25, 30)) >> 20) | 
+    ((instruction & bitmask(7, 7)) << 4) | 
+    ((instruction & bitmask(31, 31)) >> 19);
+}
 
 void Emulator::step(bool inDebugMode) {
     uint32_t instruction = ((0x000000FF & program[pc]) | 
@@ -152,6 +200,7 @@ void Emulator::step(bool inDebugMode) {
     if (opcode == OP_REG) executeRtype(instruction);
     if (opcode == OP_LUI) executeLUI(instruction);
     if (opcode == OP_AUIPC) executeAUIPC(instruction);
+    if (opcode == OP_JALR) executeJALR(instruction);
 
     instructions_executed++;
 }
