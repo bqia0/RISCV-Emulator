@@ -39,6 +39,34 @@ string extractCommand(vector<string>& tokenVector) {
     return command;
 }
 
+void tryAddCondition(string token, vector<CONDITION>& conditions) {
+    try {
+        int index = token.find("==");
+        if (index == -1) {
+            throw invalid_argument("Syntax error in expression");
+        }
+
+        // TODO: support multiple step conditions
+
+        string leftSide = token.substr(0, index);
+        string rightSide = token.substr(index + 2, token.length());
+        CONDITION condition;
+        cout << leftSide << ":" << rightSide << endl;
+
+        if (leftSide == "pc") {
+            condition.isPC = true;
+            condition.targetValue = stoi(rightSide);
+        } else { // only support leftSide are source values and rightSide are target values
+            condition.registerNumber = registerNameToRegisterIndex(leftSide);
+            condition.isRegister = true;
+            condition.targetValue = stoi(rightSide);
+        }
+        conditions.push_back(condition);
+    } catch (const invalid_argument& e) {
+        throw e;
+    }
+}
+
 void console(Emulator emulator) {
     string input;
     while (true) {
@@ -66,6 +94,19 @@ void console(Emulator emulator) {
             }
         } else if (command == "pc") {
             emulator.printPC();
+        } else if (command == "su" || command == "stepuntil") {
+            bool inDebugMode = isInTokens(arrayTokens, "-d");
+            vector<CONDITION> conditions;
+
+            try {
+                for (int i = arrayTokens.size() - 1; i >= 0; i--) {
+                    tryAddCondition(arrayTokens[i], conditions);
+                }
+                emulator.stepUntilConditionsMet(conditions, inDebugMode);
+            } catch (const invalid_argument& e) {
+                cout << "Error during condition parsing" << endl;
+            }
+            emulator.stepUntilConditionsMet(conditions, inDebugMode);
         } else if (command == "s" || command == "step") {
             bool inDebugMode = isInTokens(arrayTokens, "-d");
             if(arrayTokens.size() >= 1) {
@@ -116,20 +157,6 @@ char* readFileContents(char* filepath) {
             cout << setw(2) << setfill('0') << hex  << (0x000000FF & (unsigned int) buffer[i]) << " "; 
         }
         cout << endl;
-
-        // int programLength = fileSize / 4;
-        // char* program = new uint32_t[programLength];
-
-        // // rearrange into instruction format
-        // for(int i = 0; i < programLength; i++) {
-        //     program[i] = ((0x000000FF & buffer[i * 4]) | 
-        //        (0x000000FF & buffer[i * 4 + 1]) << 8 | 
-        //        (0x000000FF & buffer[i * 4 + 2]) << 16 | 
-        //        (0x000000FF & buffer[i * 4 + 3]) << 24);
-        //     // cout << setw(8) << setfill('0') << hex << program[i] << endl;
-        // }
-
-        // delete[] buffer;
 
         return buffer;
     } else {

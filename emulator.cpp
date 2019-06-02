@@ -21,6 +21,13 @@ uint32_t bitMask(int start, int end){
     return (((uint32_t) 1 << length) - 1) << start;
 }
 
+int16_t BImm(uint32_t instruction){
+    return ((instruction & bitMask(8, 11)) >> 7) | 
+    ((instruction & bitMask(25, 30)) >> 20) | 
+    ((instruction & bitMask(7, 7)) << 4) | 
+    ((instruction & bitMask(31, 31)) >> 19);
+}
+
 Emulator::Emulator(char* program, uint32_t initialPC = 0) {
     this->program = (uint8_t*) program; // potential bug if char is not 8 bits?
     pc = initialPC;
@@ -72,7 +79,7 @@ void Emulator::executeIType(uint32_t instruction) {
     pc = pc + 4;
 }
 
-void Emulator::executeRtype(uint32_t instruction) {
+void Emulator::executeRType(uint32_t instruction) {
     uint32_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(3);
     uint32_t rs2 = (instruction >> RS2_OFFSET) & getLSBMask(REG_INDEX_BITS);
     uint32_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
@@ -144,7 +151,7 @@ void Emulator::executeBranch(uint32_t instruction){
     uint8_t rs1 = (instruction >> RS1_OFFSET) & getLSBMask(REG_INDEX_BITS);
     uint8_t rs2 = (instruction >> RS2_OFFSET) & getLSBMask(REG_INDEX_BITS);
     int32_t imm = BImm(instruction);
-    uint8_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(FUNCT3_BITS);
+    uint8_t funct3 = (instruction >> FUNCT3_OFFSET) & getLSBMask(3);
     bool branch = false;
     switch(funct3){
         case BEQ_FUNCT3:
@@ -176,14 +183,7 @@ void Emulator::executeBranch(uint32_t instruction){
     }
 }
 
-int16_t BImm(uint32_t instruction){
-    return ((instruction & bitmask(8, 11)) >> 7) | 
-    ((instruction & bitmask(25, 30)) >> 20) | 
-    ((instruction & bitmask(7, 7)) << 4) | 
-    ((instruction & bitmask(31, 31)) >> 19);
-}
-
-void Emulator::step(bool inDebugMode) {
+void Emulator::step(bool inDebugMode) { 
     uint32_t instruction = ((0x000000FF & program[pc]) | 
                (0x000000FF & program[pc + 1]) << 8 | 
                (0x000000FF & program[pc + 2]) << 16 | 
@@ -196,11 +196,27 @@ void Emulator::step(bool inDebugMode) {
 
     uint32_t opcode = instruction & getLSBMask(OPCODE_WIDTH); // bitmask will not work if OPCODE_WIDTH = 32;
 
-    if (opcode == OP_IMM) executeIType(instruction);
-    if (opcode == OP_REG) executeRtype(instruction);
-    if (opcode == OP_LUI) executeLUI(instruction);
-    if (opcode == OP_AUIPC) executeAUIPC(instruction);
-    if (opcode == OP_JALR) executeJALR(instruction);
+    switch (opcode) {
+        case OP_IMM:
+            executeIType(instruction);
+            break;
+        case OP_REG:
+            executeRType(instruction);
+            break;
+        case OP_LUI:
+            executeLUI(instruction);
+            break;
+        case OP_AUIPC:
+            executeAUIPC(instruction);
+            break;
+        case OP_JALR:
+            executeJALR(instruction);
+            break;
+        default:
+            cout << "Invalid instruction detected; execution terminated" << endl;
+            return;
+            break;
+    }
 
     instructions_executed++;
 }
@@ -212,6 +228,23 @@ void Emulator::stepMultiple(int steps, bool inDebugMode) {
     for(int i = 0; i < steps; i++) {
         step(inDebugMode);
     }
+}
+
+bool Emulator::areConditionsMet(vector<CONDITION>& conditions) {
+    for (int i = 0; i < conditions.size(); i++) {
+        CONDITION condition = conditions[i];
+        if (condition.isPC) {
+            if (pc != condition.targetValue) return false;
+        }
+        if (condition.isRegister) {
+            if (registers[condition.registerNumber] != condition.targetValue) return false;
+        }
+    }
+    return true;
+}
+
+void Emulator::stepUntilConditionsMet(vector<CONDITION>& conditions, bool inDebugMode) {
+    while (!areConditionsMet(conditions)) step(inDebugMode);
 }
 
 void Emulator::printInstructionsExecuted() {
@@ -242,6 +275,19 @@ void Emulator::printRegisters(bool useABINames, bool useDecimal) {
 
 void Emulator::printRegister(string registerName, bool useDecimal) {
     try {
+        uint32_t registerNumber = registerNameToRegisterIndex(registerName);
+        if (useDecimal) {
+            cout << registers[registerNumber] << endl;
+        } else {
+            cout << "0x" << setw(8) << setfill('0') << registers[registerNumber] << endl;
+        }
+    } catch (const invalid_argument& e) {
+        throw invalid_argument("Specified register does not exist");
+    }
+}
+
+uint32_t registerNameToRegisterIndex(string registerName) {
+    try {
         int registerNumber = -1;
         if (registerName[0] == 'x') {
             registerNumber = stoi(registerName.substr(1, registerName.size()));
@@ -254,11 +300,7 @@ void Emulator::printRegister(string registerName, bool useDecimal) {
         if (registerNumber < 0 || registerNumber > REG_COUNT - 1) {
             throw invalid_argument("Specified register does not exist");
         }
-        if (useDecimal) {
-            cout << registers[registerNumber] << endl;
-        } else {
-            cout << "0x" << setw(8) << setfill('0') << registers[registerNumber] << endl;
-        }
+        return registerNumber;
     } catch (const invalid_argument& e) {
         throw invalid_argument("Specified register does not exist");
     }

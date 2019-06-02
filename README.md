@@ -36,4 +36,7 @@ Command | Description
 `reg [registerName] (-10)` | Prints the specified register, optionally in base 10. Accepts ABI or regular register names.
 `s/step (-d)` | Steps/executes the next instruction, optionally with additional details output to the console.
 `s/step [numberOfSteps] (-d)` | Steps/executes the specified number of steps, optionally with additional details output to the console.
+`su [condition]` | Steps until the condition is met. The condition expression only currently supports checking equality between a register and a constant. Example: `su x1==4` will step until register 1 is equal to 4.
 `q/quit` | Quits the emulator.
+
+During execution, if the emulator cannot identify an instruction, it will terminate execution.
